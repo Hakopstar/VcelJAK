@@ -1,0 +1,23 @@
+{
+    "api_version": "3.1",
+    "key": "mRtWG9A5eq9aGhwVOXXUknR8WBlw2wNyAZ0I6aiVl4g",
+    "system_id": "9c961847-c1df-4f91-b512-8c50535ee928",
+    "config" : {
+            "available" : "weig-pres-wind-temp",
+            "system_time_unit": "ms",
+            "temperature_unit": "C",
+            "pressure_unit": "Pa",
+            "voltage_unit": "V",
+            "power_unit": "W",
+            "speed_unit": "m/s",
+            "weight_unit": "gram",
+            "sound_pressure_level_unit": "db",
+            "network_strength_unit": "db",
+            "memory_unit": "bytes"
+    },
+    "calibration_settings": {
+        "last_calibration": "never",
+        "calibration_weight": 1000,
+        "calibration_weight_value": 62819
+    }
+}

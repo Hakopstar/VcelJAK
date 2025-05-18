@@ -1,0 +1,84 @@
+{
+    
+    "system_time": {
+        "units": "ms"
+    },
+    "light": {
+        "units": "lux",
+        "lowest_acceptable": 100,
+        "highest_acceptable": 2000,
+        "accuracy": 2
+      },
+    "temperature": {
+        "units": "degC",
+        "lowest_acceptable": "-50",
+        "highest_acceptable": "100",
+        "accuracy": 2
+    },
+    "humidity": {
+        "lowest_acceptable": "0",
+        "highest_acceptable": "100",
+        "accuracy": 2
+    },
+    "speed": {
+        "units": "m/s",
+        "lowest_acceptable": "0",
+        "highest_acceptable": "100",
+        "accuracy": 2
+    },
+    "pressure": {
+        "units": "Pa",
+        "lowest_acceptable": "0",
+        "highest_acceptable": "1000000",
+        "accuracy": 2
+    },
+    "wind_vane": {
+        "lowest_acceptable": "0",
+        "highest_acceptable": "360",
+        "accuracy": 2
+    },
+    "storm": {
+        "lowest_acceptable": "0",
+        "highest_acceptable": "1"
+    },
+    "weight": {
+        "units": "gram",
+        "lowest_acceptable": "-10000",
+        "highest_acceptable": "10000",
+        "accuracy": 2
+    },
+    "voltage": {
+        "units": "V",
+        "lowest_acceptable": "-300",
+        "highest_acceptable": "300",
+        "accuracy": 1
+    },
+    "wattage": {
+        "units": "W",
+        "lowest_acceptable": "-300",
+        "highest_acceptable": "300",
+        "accuracy": 1
+    },
+
+    "sound_pressure_level": {
+        "units": "db"
+    },
+    "memory": {
+        "units": "bytes"
+    },
+    "network_strenght": {
+        "units": "db"
+    },
+    "hardware_session_expire": {
+        "value": "86000"
+    },
+    "number_precision": {
+        "value": "2"
+    },
+    "backup_interval": {
+        "value": "daily"
+    },
+    "automatic": {
+        "value": "True"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "info": {
+        "api_version": 3.1
+    },
+    "data": [
+        {"id": "2", "time": "2023-04-28T17:25:50Z", "unit": "humidity", "value": 82},
+        {"id": "1", "time": "2023-04-30T16:15:50Z", "unit": "temperature", "value": 82},
+        {"id": "3", "time": "2023-04-30T16:15:50Z", "unit": "pressure", "value": 1002},
+        {"id": "4", "time": "2023-04-28T17:25:50Z", "unit": "wind_speed", "value": 7},
+        {"id": "5", "time": "2023-04-30T16:15:50Z", "unit": "wind_vane", "value": 190},
+        {"id": "6", "time": "2023-04-28T17:25:50Z", "unit": "storm", "value": 1},
+        {"id": "7", "time": "2023-04-30T16:15:50Z", "unit": "weight", "value": 120}
+
+        ]
+}
