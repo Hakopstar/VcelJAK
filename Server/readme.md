@@ -41,6 +41,8 @@ Serverová část je navržena jako sada kontejnerizovaných služeb. Níže je 
     *   `NODE_TLS_REJECT_UNAUTHORIZED=1` pro Next.js v produkci, aby se vynutilo ověřování TLS certifikátů.
     *   Všechny hesla a tajné klíče, aby byla zajištěna jejich dostatečná síla a unikátnost pro produkční prostředí.
     *   Ostatní konfigurační proměnné dle potřeb produkčního nasazení.
+4. **Zkontrolovat základní konfigurační soubor Flasku**
+   Toto není v produkční verzy vyžadováno, ale doporučuje se.
 
 Použití výchozí konfigurace s lokálními certifikáty v produkčním prostředí představuje **významné bezpečnostní riziko**.
 
@@ -76,7 +78,8 @@ Serverová část je navržena pro spuštění pomocí Dockeru a Docker Compose.
     *   Automaticky generované tajné klíče.
     *   Výchozí hodnoty jako `FLASK_DEBUG`, `SYSTEM_VERSION`, `API_VERSION`, `NEXT_PUBLIC_WEBSITE_URL`, `NEXTAUTH_URL`, a zejména `NODE_TLS_REJECT_UNAUTHORIZED` (pro produkci by měl být `1`).
     *   Viz sekce **Důležité Upozornění pro Nasazení (Deployment)** výše.
-
+    *   Základní konfigruaci flasku. Ve které se nachazí další hondoty, které server používá.
+   `VcelJAK_project/Server/Server/flask/default_config.json`
 3.  **Navigace do adresáře se službami:**
     ```bash
     cd VcelJAK_project/Server/Server
