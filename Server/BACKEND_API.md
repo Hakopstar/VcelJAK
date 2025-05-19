@@ -25,7 +25,7 @@ Tyto endpointy slouží primárně pro komunikaci mezi backendem a hardwarovým 
 *   **`POST /hive/session`**: Navázání nové relace mezi hardwarovým hubem a backendem.
     *   **Tělo požadavku (JSON, API v3.1):**
         Požadavek musí obsahovat verzi API, klíč hardwarového hubu (`key`), unikátní identifikátor hubu (`system_id`), aktuální konfiguraci hubu (`config` – včetně dostupných typů měření a definovaných jednotek) a případná kalibrační nastavení (`calibration_settings`).
-        *Příklad struktury naleznete v souboru: `example_inputs/hive_session_request_v3.1.json`*
+        *Příklad struktury naleznete v souboru: `Example_Inputs/beh_session.json`*
     *   **Zpracování:**
         1.  Validace dat a verze API.
         2.  Ověření `key` (hubového klíče) a `system_id` (UUID hubu) proti záznamům v PostgreSQL.
@@ -41,7 +41,7 @@ Tyto endpointy slouží primárně pro komunikaci mezi backendem a hardwarovým 
     *   **Hlavičky:** Může obsahovat hlavičku `X-API-Version` s hodnotou `3.1`.
     *   **Tělo požadavku (JSON, API v3.1):**
         Požadavek obsahuje objekt `info` s verzí API a pole `data`, kde každý prvek reprezentuje jedno měření. Každé měření má svůj lokální `id`, časové razítko `time` (ISO 8601 UTC), typ měření `unit` (např. "temperature", "humidity") a naměřenou `value`.
-        *Příklad struktury naleznete v souboru: `example_inputs/hive_sensor_data_request_v3.1.json`*
+        *Příklad struktury naleznete v souboru: `Example_Inputs/behdata.json`*
     *   **Zpracování:**
         1.  Autorizace pomocí údajů z Basic Auth.
         2.  Validace formátu JSON a verze API.
