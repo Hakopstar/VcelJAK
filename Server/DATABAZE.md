@@ -6,7 +6,7 @@ Serverová část projektu VcelJAK využívá tři hlavní databázové systémy
 
 *   **Účel:** Primární relační databáze pro ukládání strukturovaných dat, která nejsou časovými řadami. Zajišťuje konzistenci a vztahy mezi různými entitami systému.
 *   **ORM:** Pro interakci s PostgreSQL je v backendu (Flask) využívána knihovna SQLAlchemy, která usnadňuje manipulaci s daty a zvyšuje bezpečnost (např. ochrana proti SQL injection).
-*   **Knihovna (Driver):** `psycopg2-binary` jako driver pro Python.
+*   **Knihovna (Driver):** `psycopg3` jako driver pro Python.
 
 ### Přehled Tabulek a Jejich Účelu
 
@@ -80,7 +80,7 @@ Následuje popis hlavních tabulek definovaných pomocí SQLAlchemy modelů:
 
 ## InfluxDB
 
-*   **Účel:** Vysoce výkonná časově-řadová databáze (TSDB) optimalizovaná pro ukládání, dotazování a vizualizaci velkých objemů telemetrických dat ze senzorů.
+*   **Účel:** Časově-řadová databáze (TSDB) optimalizovaná pro ukládání, dotazování a vizualizaci velkých objemů telemetrických dat ze senzorů.
 *   **Použití:**
     *   Ukládání veškerých měřených hodnot ze senzorů (teplota, vlhkost, hmotnost, atd.) s časovým razítkem.
 
