@@ -91,8 +91,9 @@ Serverová část je navržena pro spuštění pomocí Dockeru a Docker Compose.
     ./start.sh
     ```
     Tento skript použije soubor `docker-compose.yml` (nebo `.yaml`) a `.env` k sestavení (pokud je to nutné) a spuštění všech Docker kontejnerů v detached módu (`-d`).
+    Nginx adresa je pak na portu 8443
 
-5.  **Ověření stavu a logů:**
+6.  **Ověření stavu a logů:**
     *   Stav kontejnerů: `docker-compose ps` (nebo `docker compose ps`)
     *   Logy konkrétní služby (např. `backend`): `docker-compose logs -f backend`
 
