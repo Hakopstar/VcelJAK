@@ -123,4 +123,3 @@ Pro detailnější informace o jednotlivých částech serveru prosím navštivt
 *   **[Dokumentace Frontendu](FRONTEND.md):** Popis frontendové aplikace, jejích stránek a funkcí.
 *   **[Dokumentace Backend API](BACKEND_API.md):** Detailní specifikace API endpointů poskytovaných backendem.
 *   **[Popis Databází](DATABAZE.md):** Informace o použitých databázích, jejich strukturách a účelu.
-*   **[Integrace Hardwarového Hubu](HW_HUB_INTEGRACE.md):** Průvodce pro integraci hardwarových hubů se serverem.
