@@ -1,0 +1,151 @@
+###############################
+# Docker compose file, 
+# Last version of update: v0.91
+# commands used: docker compose up, docker compose up --build
+###############################
+
+
+# Services, running instances
+services:
+# WEB HANDLER SECTION
+  # FLASK router and handler
+  flask:
+    build: 
+      context: ./flask
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+    # FLASK Environment Variables
+      - SYSTEM_VERSION=${SYSTEM_VERSION}
+      - API_VERSION=${API_VERSION}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - DIGEST_SECRET_KEY=${DIGEST_SECRET_KEY}
+      - SECRET_REGISTER_API_KEY=${SECRET_REGISTER_API_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+  
+      - HARDWARE_SESSION_EXPIRE=${HARDWARE_SESSION_EXPIRE}
+      - NUMBER_PRECISION=${NUMBER_PRECISION}
+
+      - MEMCACHE_HOST=${MEMCACHE_HOST}
+      - MEMCACHE_PORT=${MEMCACHE_PORT} 
+    # INFLUXDB Environment Variables
+      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      - INFLUXDB_URL=${INFLUXDB_URL}
+      - WEBPAGE_USER=${WEBPAGE_USER}
+      - WEBPAGE_PASS=${WEBPAGE_PASS}
+
+    # POSTGRES Environment Variables
+      - POSTGRES_AUDIO_ACCESS_PASS=${POSTGRES_AUDIO_ACCESS_PASS}
+      - POSTGRES_USERS_ACCESS_PASS=${POSTGRES_USERS_ACCESS_PASS}
+      - POSTGRES_TEST_PASS=${POSTGRES_TEST_PASS}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+    depends_on:
+      - postgres
+      - influxdb
+    volumes:
+      - audio-volume:/app/app/audio_storage
+    ports: # Port Routing
+      - "8080:8080"
+    expose:
+      - "8080"
+    networks:
+      - beehive-network
+    
+  # NGINX Server
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - nextjs
+      - flask
+    ports:
+      - "1024:80"
+      - "8443:443"
+    networks:
+      - beehive-network
+    
+
+# DATABASE SECTION
+  # Influxdb database
+  influxdb:
+    build: ./influxdb
+    restart: always
+    environment:
+      # INFLUXDB INIT VARIABLES
+      - DOCKER_INFLUXDB_INIT_MODE=${DOCKER_INFLUXDB_INIT_MODE}
+      - DOCKER_INFLUXDB_INIT_USERNAME=${DOCKER_INFLUXDB_INIT_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${DOCKER_INFLUXDB_INIT_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+    volumes:
+      - influxdb-volume:/var/lib/influxdb2
+    ports:
+      - "8087:8086"
+    networks:
+      - beehive-network
+
+
+  # Postgres database
+  postgres:
+    build: 
+      context: ./postgres
+      args:
+        # Passing arguments into dockerfile to build
+         POSTGRES_AUDIO_ACCESS_PASS: ${POSTGRES_AUDIO_ACCESS_PASS}
+         POSTGRES_USERS_ACCESS_PASS: ${POSTGRES_USERS_ACCESS_PASS}
+         POSTGRES_TEST_PASS: ${POSTGRES_TEST_PASS}
+    restart: always
+    environment:
+      # Password Configuration for default account "postgres"
+      - POSTGRES_PASSWORD=${DOCKER_POSTGRES_PASSWORD}
+    
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+    # TODO: IN FINAL VERSION LOCK
+      - "5544:5432"
+    networks:
+      - beehive-network
+
+  memcached:
+    build: 
+      context: ./memcached
+    restart: always
+    ports:
+      - "11211:11211"
+    networks:
+      - beehive-network
+
+  nextjs:
+    build: 
+      context: ./nextjs
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_WEBSITE_URL=${NEXT_PUBLIC_WEBSITE_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED}
+    depends_on:
+      - flask
+    ports:
+      - "3000:3000"
+    networks:
+      - beehive-network
+
+
+#### Volumes ####
+volumes:
+  postgres-data:
+  influxdb-volume:
+  audio-volume:
+
+networks:
+  beehive-network:
+    driver: bridge

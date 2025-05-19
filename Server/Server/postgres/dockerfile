@@ -1,0 +1,27 @@
+##############################################################
+# Postgres Setup file
+# Last version of update: v0.79
+#
+##############################################################
+
+
+
+FROM postgres:latest
+
+# Get argument from docker-compose file
+ARG POSTGRES_AUDIO_ACCESS_PASS
+ARG POSTGRES_USERS_ACCESS_PASS
+ARG POSTGRES_TEST_PASS
+
+#
+ENV POSTGRES_AUDIO_ACCESS_PASS=$POSTGRES_AUDIO_ACCESS_PASS
+ENV POSTGRES_USERS_ACCESS_PASS=$POSTGRES_USERS_ACCESS_PASS
+ENV POSTGRES_TEST_PASS=$POSTGRES_TEST_PASS
+
+RUN apt update
+RUN apt-get install gettext-base
+COPY create_databases.sql /backup.sql
+
+# Pass keys into docker container and create file backup.sql 
+#In this file replace ${token} with token from enviroment variables
+RUN envsubst < /backup.sql > /docker-entrypoint-initdb.d/create_databases.sql
