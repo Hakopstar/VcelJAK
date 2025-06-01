@@ -6,7 +6,7 @@ Frontend představuje primární vizuální rozhraní, které umožňuje uživat
 
 *   **Účel:** Poskytnout intuitivní a responzivní uživatelské rozhraní pro monitorování a správu včelstev.
 *   **Technologie:**
-    *   Framework: Next.js (verze 15.2.3)
+    *   Framework: Next.js (verze 15.3.3)
     *   Programovací jazyk: TypeScript
     *   UI Komponenty: Shadcn UI
     *   Stylování: TailwindCSS
@@ -19,7 +19,7 @@ Frontend představuje primární vizuální rozhraní, které umožňuje uživat
 Hlavní stránka po přihlášení, poskytující ucelený přehled o všech aktivních úlech.
 *   Levý panel: Aktuální venkovní informace (např. data z meteostanice, tipy).
 *   Pravý panel: Grafy a schémata jednotlivých úlů (po rozkliknutí úlu).
-*   Získávání dat: Volání na Backend API `/api/get_beehives` a `/api/sensors` (s parametry).
+*   Získávání dat: Volání na Backend API `/sapi/beehives` a `/sapi/sensor-history` (s parametry).
 
 ### Přihlašování a Správa Relací
 *   Využívá JWT access tokeny a session cookies generované NextAuth.
@@ -34,21 +34,26 @@ Hlavní stránka po přihlášení, poskytující ucelený přehled o všech akt
 ### `/admin/*` (Chráněná Administrační Sekce)
 Přístup k těmto stránkám je možný pouze po úspěšné autentizaci. Přístupová práva jsou řízena pomocí NextAuth a Middleware v Next.js. Pro správné fungování jsou nutné platné tokeny: NextAuth JWT, Backend JWT a CSRF verifikační token.
 
-*   **`/admin/hub` (Správa Hardwarových Hubů):**
+*   **`/admin/hubs` (Správa Hardwarových Hubů):**
     *   Zobrazení informací o hubech (UUID, počet senzorů, čas poslední aktualizace).
     *   Možnost přidávat, odstraňovat nebo regenerovat autentizační klíč hubu. Klíč je ukládán jako hash.
-*   **`/admin/sensors` (Aktuální Dění Senzorů a Hubů):**
+*   **`/admin/sensorsandhubs` (Aktuální Dění Senzorů a Hubů):**
     *   Zobrazení aktuálně přijatých hodnot ze senzorů.
     *   Informace o stavu hardwarových hubů.
     *   Možnost filtrování dat, zobrazení času poslední aktualizace.
-*   **`/admin/beehive` (Správa Včelích Úlů):**
-    *   Zobrazení a úprava údajů o úlech (včetně meteostanic).
-    *   Přiřazování senzorů k úlům (senzory jsou prvotně v neviditelném "system" úlu).
-    *   Možnost přejmenování, deaktivace, odstranění úlu.
-    *   Funkce plánování inspekce.
+*   **`/admin/groups` (Správa Včelích Úlů):**
+    *   Zobrazení a úprava údajů o skupinách (meteostanice, úly, obecné).
+    *   Přiřazování senzorů pravidel ke skupinám.
+    *   Možnost přejmenování, deaktivace, odstranění skupin.
+*   **`/admin/rules` (Správa pravidel):**
+    *   Úprava a správa pravidel, vytvoření pravidel, inciatorů a přidání akcí
+*   **`/admin/schedules` (Správa kalendáře a plánů):**
+    *   Úprava základního nastavení serveru (jednotky pro zobrazované hodnoty, limity pro příjem dat ze senzorů).
 *   **`/admin/session` (Správa Aktuálních Relací Hardwarových Hubů):**
     *   Zobrazení informací o aktivních relacích (čas vzniku, časový limit).
     *   Možnost rušení relací.
+*   **`/admin/tags` (Správa všech typů štítků):**
+    *   Úprava štítků, vytvoření nových, přejmenování etc.
 *   **`/admin/config` (Konfigurace Serveru):**
     *   Úprava základního nastavení serveru (jednotky pro zobrazované hodnoty, limity pro příjem dat ze senzorů).
 
