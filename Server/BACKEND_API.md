@@ -54,16 +54,6 @@ Tyto endpointy slouží primárně pro komunikaci mezi backendem a hardwarovým 
     *   Primárně určeno pro sledování stavu meteostanice připojené k úlu.
     *   Veřejně přístupné, bez šifrování nebo autentizace.
 
-### Veřejné Datové API (`/api/*`)
-Tyto endpointy poskytují zpracované informace a jsou veřejně přístupné (mohou být chráněny rate limitingem).
-
-*   **`GET /api/sensors`**: Vrací JSON soubor obsahující nejnovější měření všech senzorů.
-*   **`GET /api/sensors?beehiveId=<ID_VCELSTVA>&timeScale=<CASOVY_ROZSAH>`**: Vrací JSON soubor s daty pro specifické včelstvo a časové rozmezí.
-    *   **Parametry:**
-        *   `beehiveId` (string): ID včelstva.
-        *   `timeScale` (string): `day`, `week`, `month`, `year`.
-    *   Odmítnutí požadavku, pokud parametry chybí nebo jsou neplatné.
-
 ### Administrační API (`/access/*`)
 Tyto endpointy slouží ke správě a administraci serveru a vyžadují platný JWT token v `Authorization: Bearer <token>` hlavičce (kromě `/access/login`). Interakce s těmito endpointy automaticky prodlužuje expiraci JWT tokenu.
 
@@ -71,38 +61,6 @@ Tyto endpointy slouží ke správě a administraci serveru a vyžadují platný 
     *   **Tělo požadavku (JSON):** `username`, `password`.
     *   **Odpověď (JSON):** JWT token.
 *   **`POST /access/logout`**: Odhlášení uživatele (invalidace JWT tokenu).
-*   **`GET /access/get_hubs`**: Získá informace o všech hardwarových hubech.
-*   **`GET /access/get_beehives`**: Získá informace o všech registrovaných včelstvech.
-*   **`GET /access/get_config`**: Vrací aktuální konfigurační nastavení serveru.
-*   **`GET /access/get_sessions`**: Poskytuje informace o aktuálně běžících relacích hardwarových hubů.
-*   **`POST /access/new_hub`**: Vytvoření nového hardwarového hubu.
-    *   **Tělo požadavku (JSON):** `name`, `location` (nepovinné).
-    *   **Odpověď (JSON):** UUID nového hubu, vygenerovaný hardwarový klíč (hash klíče uložen v DB).
-*   **`POST /access/save_config`**: Uložení nové konfigurace serveru.
-    *   **Tělo požadavku (JSON):** Nová konfigurace.
-    *   **Odpověď:** 200 OK při úspěchu.
-*   **`POST /access/rename_hub`**: Přejmenování hardwarového hubu.
-    *   **Tělo požadavku (JSON):** `hubId`, `newName`.
-*   **`POST /access/edit_beehive`**: Úprava informací o včelím úlu.
-    *   **Tělo požadavku (JSON):** `action` (`add`, `edit`, `update_inspection`), `beehiveId` (pro editaci/inspekci), `name`, `location`, `inspectionTime` (dle akce).
-*   **`POST /access/change_api_key`**: Vygenerování nového API klíče pro hardwarový hub.
-    *   **Tělo požadavku (JSON):** `hubId`.
-    *   **Odpověď (JSON):** Nový API klíč (hash uložen v DB).
-*   **`POST /access/change_password`**: Změna hesla administrátora.
-    *   **Tělo požadavku (JSON):** `oldPassword`, `newPassword`.
-*   **`POST /access/calibrate_sensor`**: Kalibrace senzoru.
-    *   **Tělo požadavku (JSON):** `sensorId`, `calibrationValue`.
-*   **`POST /access/assign_sensor`**: Přiřazení senzoru k včelímu úlu.
-    *   **Tělo požadavku (JSON):** `sensorId`, `beehiveId`.
-    *   Pozn.: Pro InfluxDB probíhá kopírování dat na nové `beehiveId` a následné smazání z původního.
-*   **`POST /access/unassign_sensor`**: Přiřazení senzoru do systémového úlu (ID 0). Původní měření nejsou přenášena ani mazána.
-    *   **Tělo požadavku (JSON):** `sensorId`.
-*   **`POST /access/delete_hub`**: Odstranění hardwarového hubu.
-    *   **Tělo požadavku (JSON):** `hubId`.
-*   **`POST /access/delete_beehive`**: Odstranění včelího úlu.
-    *   **Tělo požadavku (JSON):** `beehiveId`.
-*   **`POST /access/terminate_sessions`**: Ukončení relace hardwarového hubu.
-    *   **Tělo požadavku (JSON):** `sessionId`.
 *   **`GET /access/token_verify`**: Ověření platnosti aktuálně používaného JWT tokenu.
     *   **Odpověď:** 200 OK pokud je platný, 400 "invalid credentials" pokud neplatný.
 
