@@ -13,7 +13,7 @@ Serverová část je navržena jako sada kontejnerizovaných služeb. Níže je 
 *   **Databáze:**
     *   **PostgreSQL:** Primární relační databáze pro ukládání metadat o uživatelích, hubech, včelstvech, konfiguracích a relačních datech.
     *   **InfluxDB:** Časově-řadová databáze optimalizovaná pro ukládání a dotazování velkých objemů měřených dat ze senzorů.
-    *   **Memcached:** In-memory databáze používaná pro caching a ukládání dočasných dat, například pro rate limiting.
+    *   **Redis:** In-memory databáze používaná pro caching a ukládání dočasných dat, komunikace mezi SSE clienty, vytváří SSE channely pro komunikaci.
 *   **Hardwarový hub (Hardwarový hub):** Zařízení umístěné u včelstev, které sbírá data z připojených senzorů a odesílá je na server.
 *   **Senzory (Senzory):** Zařízení jako BMX280, HX711 připojená k hardwarovému hubu, měřící různé veličiny (teplota, vlhkost, hmotnost atd.).
 
@@ -23,7 +23,7 @@ Serverová část je navržena jako sada kontejnerizovaných služeb. Níže je 
 
 *   **Backend:** Python, Flask, SQLAlchemy
 *   **Frontend:** Next.js, TypeScript, React, Shadcn UI, TailwindCSS, NextAuth
-*   **Databáze:** PostgreSQL, InfluxDB, Memcached
+*   **Databáze:** PostgreSQL, InfluxDB, Redis
 *   **Web Server / Proxy:** Nginx
 *   **WSGI Server:** uWSGI
 *   **Kontejnerizace:** Docker, Docker Compose
