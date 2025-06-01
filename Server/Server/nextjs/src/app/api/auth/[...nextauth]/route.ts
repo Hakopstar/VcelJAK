@@ -16,7 +16,7 @@ export const authOptions : NextAuthOptions = {
       async authorize(credentials) {
         console.log("Logging started")
   
-        const res = await fetch('https://nginx/access/login', {
+        const res = await fetch(`https://nginx/access/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(credentials),
@@ -64,7 +64,7 @@ export const authOptions : NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 12 * 60 * 60, // 30 days - TODO: ADD Some logic
+    maxAge: 12 * 60 * 60, // 30 days
   },
 
   secret: process.env.NEXTAUTH_SECRET,

@@ -3,15 +3,32 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "~/lib/utils"
-import { Home, Settings, Database, Server, Clock, LogOut, Radio } from "lucide-react"
+import {
+  Home,
+  Settings,
+  Database,
+  Server,
+  Clock,
+  LogOut,
+  Radio,
+  Tag,
+  AlertTriangle,
+  Calendar,
+  HelpCircle,
+  Bell,
+  LayoutDashboard,
+} from "lucide-react"
 import { Button } from "~/components/ui/button"
+import { Badge } from "~/components/ui/badge"
 import { useLogout } from "~/lib/auth";
 
 const sidebarItems = [
-  { name: "Dashboard", href: "/", icon: Home },
   { name: "Sensors & Hubs", href: "/admin/sensors", icon: Radio },
   { name: "Hub Management", href: "/admin/hubs", icon: Server },
-  { name: "Beehive Management", href: "/admin/beehives", icon: Database },
+  { name: "Group Management", href: "/admin/groups", icon: Database },
+  { name: "Tags", href: "/admin/tags", icon: Tag },
+  { name: "Rules", href: "/admin/rules", icon: AlertTriangle },
+  { name: "Schedule", href: "/admin/schedules", icon: Calendar },
   { name: "Sessions", href: "/admin/sessions", icon: Clock },
   { name: "Server Configuration", href: "/admin/config", icon: Settings },
 ]
@@ -26,6 +43,17 @@ export default function AdminSidebar() {
         <h1 className="text-xl font-bold text-primary">Admin Panel</h1>
       </div>
       <nav className="p-4 space-y-1">
+        <Link
+          href="/"
+          className={cn(
+            "flex items-center space-x-3 px-3 py-2 rounded-md transition-colors",
+            "text-muted-foreground hover:bg-primary/5 hover:text-primary",
+          )}
+        >
+          <Home className="h-5 w-5" />
+          <span>Home</span>
+        </Link>
+
         {sidebarItems.map((item) => {
           const isActive = pathname === item.href
           const Icon = item.icon
@@ -40,6 +68,11 @@ export default function AdminSidebar() {
             >
               <Icon className="h-5 w-5" />
               <span>{item.name}</span>
+              {item.badge && (
+                <Badge className="ml-auto" variant="destructive">
+                  {item.badge}
+                </Badge>
+              )}
             </Link>
           )
         })}

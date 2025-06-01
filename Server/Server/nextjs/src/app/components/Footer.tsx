@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-primary">About Us</h3>
             <p className="text-sm text-muted-foreground">
-              BeehiveMonitor provides cutting-edge solutions for beekeepers to monitor and maintain their hives
+              VcelJAK provides cutting-edge solutions for beekeepers to monitor and maintain their hives
               efficiently.
             </p>
           </div>

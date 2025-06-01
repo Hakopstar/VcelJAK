@@ -1,0 +1,22 @@
+[ 
+    {
+      "id": "1-normal",
+      "name": "Normal Mode",
+      "type": "mode", 
+      "description": "Standard operating mode" 
+    },
+
+    {
+      "id": "2-curing",
+      "name": "Curing Mode",
+      "type": "mode",
+      "description": "Mode for honey curing process"
+    },
+    {
+      "id": "3-winter",
+      "name": "Winter Mode",
+      "type": "mode",
+      "description": "Preparation for winter season"
+    }
+
+]

@@ -17,6 +17,11 @@ type HardwareSession = {
   endTime: string | null
 }
 
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+
+
 export default function SessionsPage() {
   const [hardwareSessions, setHardwareSessions] = useState<HardwareSession[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -36,7 +41,8 @@ export default function SessionsPage() {
     setError(null)
 
     try {
-      const response = await fetch(`/access/get_sessions`, {
+      // Replace with actual API endpoint when available
+      const response = await fetch(`${API_BASE_URL}/access/sessions/get_sessions`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${session?.accessToken}`
@@ -72,8 +78,8 @@ export default function SessionsPage() {
 
   const handleTerminateSession = async (sessionId: string) => {
     try {
-      
-      const response = await fetch(`/access/terminate_session`, {
+      // Replace with actual API endpoint when available
+      const response = await fetch(`${API_BASE_URL}/access/sessions/terminate_session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

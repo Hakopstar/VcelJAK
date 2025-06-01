@@ -1,3 +1,9 @@
+####################################################
+# read.py - historic file
+# Last version of update: v0.91
+# app/db_man/influxdb/read.py
+####################################################
+
 from app.db_man.influxdb.engine import *
 import logging
 from datetime import datetime, timezone
@@ -104,7 +110,7 @@ def get_num_id_in_measurement(measurement):
     count = len(unique_ids)
     return count
 
-def get_last_beehive_data(bid):
+def get_last_group_data(bid):
     query_api = client.query_api()
     query = f'''
     from(bucket: "{os.getenv("DOCKER_INFLUXDB_INIT_BUCKET")}")
@@ -115,20 +121,20 @@ def get_last_beehive_data(bid):
     '''
     tables = query_api.query(query)
     logging.debug(f"debug moment: {tables}")
-    beehive_data = {}
+    group_data = {}
     for table in tables:
         for record in table.records:
             bid = record.values.get("bid")
             unit = record.values.get("unit")
             value = record.get_value()
             
-            if bid not in beehive_data:
-                beehive_data[bid] = {"id": bid}
+            if bid not in group_data:
+                group_data[bid] = {"id": bid}
             
             # Ensure only the last value of each unit type is kept
-            beehive_data[bid][unit] = value
+            group_data[bid][unit] = value
     
-    return list(beehive_data.values())
+    return list(group_data.values())
 
 
 
@@ -162,7 +168,7 @@ def get_last_single_data(sensor_id, bid):
         |> last()  // Get the last record for each sensor
     '''
     tables = query_api.query(query)
-    beehive_data = {}
+    group_data = {}
     for table in tables:
         for record in table.records:
             
@@ -171,15 +177,15 @@ def get_last_single_data(sensor_id, bid):
             value = record.get_value()
             time = record.get_time().astimezone(ZoneInfo("Europe/Prague"))
             
-            if sensor_id not in beehive_data:
-                beehive_data[sensor_id] = {"bid": bid}
+            if sensor_id not in group_data:
+                group_data[sensor_id] = {"bid": bid}
             
             # Ensure only the last value of each unit type is kept
-            beehive_data[sensor_id]['unit'] = unit
-            beehive_data[sensor_id]['value'] = value
-            beehive_data[sensor_id]['time'] = time
+            group_data[sensor_id]['unit'] = unit
+            group_data[sensor_id]['value'] = value
+            group_data[sensor_id]['time'] = time
     
-    return list(beehive_data.values())
+    return list(group_data.values())
 
 
 

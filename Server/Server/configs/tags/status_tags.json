@@ -1,0 +1,38 @@
+[
+    { 
+      "id": "7-queen", 
+      "name": "Queen Present",
+      "type": "status", 
+      "description": "Queen bee is present in the hive" 
+    },
+    { 
+      "id": "8-queenless", 
+      "name": "Queenless hive detected",
+      "type": "status", 
+      "description": "Queen bee is not present in the hive" 
+    },
+    { 
+      "id": "9-swarming", 
+      "name": "Swarming detected",
+      "type": "status", 
+      "description": "Swarming is detected" 
+    },
+    {
+      "id": "10-harvest",
+      "name": "Ready for Harvest",
+      "type": "status",
+      "description": "Honey is ready to be harvested"
+    },
+    {
+      "id": "11-risk",
+      "name": "At Risk",
+      "type": "status",
+      "description": "Hive requires attention"
+    },
+    {
+      "id": "12-critical",
+      "name": "Critical",
+      "type": "status",
+      "description": "Urgent intervention needed"
+    }
+]

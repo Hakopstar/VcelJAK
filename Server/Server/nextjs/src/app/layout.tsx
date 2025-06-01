@@ -22,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <title>VcelJAK</title>
+
       <body className={inter.className}>
       <ThemeProvider>
         <SessionProvider>
