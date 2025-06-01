@@ -98,10 +98,11 @@ Následuje popis hlavních tabulek definovaných pomocí SQLAlchemy modelů:
 *   **Dotazování:** Pro komplexnější operace a dotazy se využívá dotazovací jazyk FLUX.
 *   **Knihovna:** `influxdb-client` pro Python.
 
-## Memcached
+## Redis
 
 *   **Účel:** Distribuovaný in-memory caching systém.
 *   **Použití:**
     *   **Caching:** Ukládání často dotazovaných dat do operační paměti pro zrychlení odpovědí (např. výsledky některých API volání).
     *   **Rate Limiting:** Ukládání informací o počtu požadavků z jednotlivých IP adres pro implementaci rate limitingu na `/api` a `/hive` endpointy.
+    *   **SSE Channels** Ukládání informací SSE - zdraví a další informace.
     *   Dočasné uchovávání stavových informací, které nevyžadují persistentní uložení v PostgreSQL nebo InfluxDB.
