@@ -1,6 +1,6 @@
 ##########################################
 # JSON SCHEMA - new testing parameters
-# Last version of update: v0.81
+# Last version of update: v0.95
 # API Version 3.1v
 ##########################################
 
@@ -85,7 +85,7 @@ diagnostics_schema = {
 				"speed_unit": {"type": "string"},
 				"weight_unit": {"type": "string"},
 				"sound_pressure_level_unit": {"type": "string"},
-				"network_strenght_unit": {"type": "string"}
+				"network_strength_unit": {"type": "string"}
 			}
 		},
 		"status": {
@@ -135,7 +135,7 @@ diagnostics_schema = {
 				"network": {
 					"type": "object",
 					"properties": {
-						"signal_strenght": {
+						"signal_strength": {
 							"type": "object",
 							"properties": {
 								"connected": {"type": "boolean"},
@@ -170,7 +170,7 @@ diagnostics_schema = {
 						}
 					},
 					"required": [
-						"signal_strenght"
+						"signal_strength"
 					],
                     "additionalProperties": False
 				}
@@ -209,7 +209,7 @@ newsession_request_schema = {
         "speed_unit": {"type": "string"},
         "weight_unit": {"type": "string"},
         "sound_pressure_level_unit": {"type": "string"},
-        "network_strenght_unit": {"type": "string"},
+        "network_strength_unit": {"type": "string"},
         "memory_unit": {"type": "string"}
       },
       "required": [
@@ -221,7 +221,7 @@ newsession_request_schema = {
         "speed_unit",
         "weight_unit",
         "sound_pressure_level_unit",
-        "network_strenght_unit"
+        "network_strength_unit"
       ],
       "additionalProperties": False
     },
@@ -249,4 +249,62 @@ newsession_request_schema = {
   ],
   "additionalProperties": False
 }
-# END
+
+actionParams_schema = {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "customMessage": {
+      "type": "string"
+    },
+    "healthType": {
+      "type": "string"
+    },
+    "incrementAmount": {
+      "type": "number"
+    },
+    "progressType": {
+      "type": "string"
+    },
+    "scheduleCategory": {
+      "type": "string"
+    },
+    "scheduleDate": {
+      "type": "string"
+    },
+    "scheduleDescription": {
+      "type": "string"
+    },
+    "scheduleId": {
+      "type": "string"
+    },
+    "schedulePriority": {
+      "type": "string"
+    },
+    "scheduleSeason": {
+      "type": "string"
+    },
+    "scheduleTime": {
+      "type": "string"
+    },
+    "scheduleTitle": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string"
+    },
+    "tagId": {
+      "type": "string"
+    },
+    "targetValue": {
+      "type": "number"
+    },
+    "template": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": False
+}

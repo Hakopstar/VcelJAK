@@ -8,469 +8,615 @@ import { Label } from "~/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Switch } from "~/components/ui/switch"
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react"; // Added signOut
 import { 
   Save, 
-  RotateCcw, 
-  Plus,
-  MoreHorizontal,
-  Trash,
-  Edit,
-  LinkIcon,
-  Link2OffIcon as LinkOff,
-  Calendar,
-  RefreshCw,
-  AlertCircle, 
-  ArrowLeft} from "lucide-react"
-import { toast } from "~/hooks/use-toast"
+  RotateCcw,
+  AlertCircle,
+  RefreshCw 
+  
+} from "lucide-react"
+import { toast } from "~/hooks/use-toast" 
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog"
-import { undefined } from "zod"
-// Initial configuration
+
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+// Helper to format backend keys (e.g., "sound_pressure_level" to "Sound Pressure Level")
+const formatKeyToLabel = (key: string): string => {
+  if (!key) return "";
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+// Define comprehensive unit options for known measurement types
+const measurementUnitOptions: Record<string, Array<{ value: string; label: string }>> = {
+  temperature: [
+    { value: "degC", label: "Celsius (°C)" },
+    { value: "degF", label: "Fahrenheit (°F)" },
+    { value: "K", label: "Kelvin (K)" },
+  ],
+  weight: [
+    { value: "gram", label: "Grams (g)" },
+    { value: "kg", label: "Kilograms (kg)" },
+    { value: "lb", label: "Pounds (lb)" },
+    { value: "oz", label: "Ounces (oz)" },
+  ],
+  sound: [ // Assuming 'sound' is the key for 'sound_pressure_level' after backend processing
+    { value: "dB", label: "Decibels (dB)" },
+    { value: "dBA", label: "Decibels A-weighted (dBA)" },
+  ],
+  light: [
+    { value: "lux", label: "Lux (lx)" },
+    { value: "fc", label: "Foot-candles (fc)" },
+  ],
+  speed: [
+    { value: "m/s", label: "Meters per second (m/s)" },
+    { value: "km/h", label: "Kilometers per hour (km/h)" },
+    { value: "mph", label: "Miles per hour (mph)" },
+    { value: "knot", label: "Knots (kn)" },
+  ],
+  pressure: [
+    { value: "Pa", label: "Pascal (Pa)" },
+    { value: "hPa", label: "Hectopascal (hPa)" },
+    { value: "kPa", label: "Kilopascal (kPa)" },
+    { value: "mbar", label: "Millibar (mbar)" },
+    { value: "bar", label: "Bar (bar)" },
+    { value: "atm", label: "Atmosphere (atm)" },
+    { value: "psi", label: "Pounds per square inch (psi)" },
+    { value: "mmHg", label: "Millimeters of mercury (mmHg)" },
+  ],
+  voltage: [
+    { value: "mV", label: "Millivolts (mV)" },
+    { value: "V", label: "Volts (V)" },
+  ],
+  wattage: [
+    { value: "mW", label: "Milliwatts (mW)" },
+    { value: "W", label: "Watts (W)" },
+    { value: "kW", label: "Kilowatts (kW)" },
+  ],
+  memory: [ // Added Memory
+    { value: "bytes", label: "Bytes (B)" },
+    { value: "KB", label: "Kilobytes (KB)" },
+    { value: "MB", label: "Megabytes (MB)" },
+    { value: "GB", label: "Gigabytes (GB)" },
+  ],
+  network_strength: [ // Added Network Strength
+    { value: "dBm", label: "Decibel-milliwatts (dBm)" },
+    { value: "RSSI", label: "Received Signal Strength Ind. (RSSI)" },
+    { value: "%", label: "Percentage (%)" },
+  ],
+  system_time: [ // Example for system_time if it were a configurable unit
+    { value: "ms", label: "Milliseconds (ms)" },
+    { value: "s", label: "Seconds (s)" },
+  ],
+  // Add other known measurement types and their units here
+  // e.g. wind_vane: [{value: "deg", label: "Degrees (°)"}]
+};
+
+const systemSettingSelectOptions: Record<string, Array<{ value: string; label: string }>> = {
+  backupFrequency: [ // Corresponds to 'backup_interval' in your DB image
+    { value: "hourly", label: "Hourly" },
+    { value: "daily", label: "Daily" },
+    { value: "weekly", label: "Weekly" },
+    { value: "monthly", label: "Monthly" },
+  ],
+  // Add other system settings that should use a Select dropdown
+  // e.g., theme: [{value: "light", label: "Light Mode"}, {value: "dark", label: "Dark Mode"}]
+};
+
+
+// Define the expected shape of your config object
+interface MeasurementSetting {
+  unit?: string;
+  decimalPlaces?: number;
+  lowest?: number | string; // Allow string for initial input
+  highest?: number | string; // Allow string for initial input
+  [key: string]: any; // For any other properties
+}
+
+interface SystemSettings {
+  autoBackup?: boolean; // Corresponds to 'automatic' in your DB image
+  backupFrequency?: string; // Corresponds to 'backup_interval'
+  numberPrecision?: number; // Corresponds to 'number_precision'
+  hardwareSessionExpire?: number; // Corresponds to 'hardware_session_expire'
+  firstInit?: boolean | number; // Corresponds to 'first_init'
+  [key: string]: any; // For other dynamic system settings
+}
+interface AppConfig {
+  measurements: Record<string, MeasurementSetting>;
+  system: SystemSettings;
+}
 
 
 export default function ConfigPage() {
-  const [config, setConfig] = useState()
-  const [hasChanges, setHasChanges] = useState(false)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [newUser, setnewUser] = useState({ name: "", location: "" })
-  const [isLoading, setIsLoading] = useState(false)
-  const [username, setUsername] = useState('');
+  const [config, setConfig] = useState<AppConfig | undefined>(undefined);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Password change state
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [password, setPassword] = useState('')
-  const [loginError, setLoginError] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
+  const [passwordChangeError, setPasswordChangeError] = useState<string | null>(null);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && session?.accessToken) {
       fetchConfig();
+    } else if (status === "unauthenticated") {
+      // Handle case where user is not logged in, e.g., redirect or show message
+      setIsLoading(false);
+      setError("Please log in to view the configuration.");
     }
-  }, [status, session]);
+    
+  }, [status, session?.accessToken]); // Depend on accessToken to refetch if it changes
   
-  const handleMeasurementChange = (measurement: string, property: string, value: string | number | boolean) => {
-    setConfig({
-      ...config,
+  const handleMeasurementChange = (measurementKey: string, property: string, value: string | number | boolean) => {
+    if (!config) return;
+    setConfig(prevConfig => ({
+      ...prevConfig!,
       measurements: {
-        ...config.measurements,
-        [measurement]: {
-          ...config.measurements[measurement as keyof typeof config.measurements],
+        ...prevConfig!.measurements,
+        [measurementKey]: {
+          ...prevConfig!.measurements[measurementKey],
           [property]: value,
         },
       },
-    })
-    setHasChanges(true)
-  }
+    }));
+    setHasChanges(true);
+  };
   
-
   const fetchConfig = async () => {
-    setIsLoading(true)
-    setError(null)
+    if (!session?.accessToken) {
+      setError("Authentication token not available.");
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch(`/access/get_config`, {
+      const response = await fetch(`${API_BASE_URL}/access/config/get_config`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${session?.accessToken}`
+          "Authorization": `Bearer ${session.accessToken}`
         },
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch configuration: ${response.status}`)
+        if (response.status === 401) signOut();
+        throw new Error(`Failed to fetch configuration: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json()
-      setConfig(data)
-      setHasChanges(false)
+      const data: AppConfig = await response.json();
+      setConfig(data);
+      setHasChanges(false);
       
-    } catch (err) {
-      console.error("Error fetching configuration:", err)
-      setError("Failed to load configuration. Using default values.")
+    } catch (err: any) {
+      console.error("Error fetching configuration:", err);
+      setError(err.message || "Failed to load configuration. Please try again.");
       toast({
-        title: "Error",
-        description: "Failed to load configuration. Using default values.",
+        title: "Error Fetching Config",
+        description: err.message || "Failed to load configuration. Using default values or try refreshing.",
         variant: "destructive",
-      })
-      // Use initial config as fallback\
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const handleSystemChange = (property: string, value: string | number | boolean) => {
-    setConfig({
-      ...config,
+  const handleSystemChange = (propertyKey: string, value: string | number | boolean) => {
+    if (!config) return;
+    setConfig(prevConfig => ({
+      ...prevConfig!,
       system: {
-        ...config.system,
-        [property]: value,
+        ...prevConfig!.system,
+        [propertyKey]: value,
       },
-    })
-    setHasChanges(true)
-  }
-
+    }));
+    setHasChanges(true);
+  };
 
   const handleSave = async () => {
-    setIsSaving(true)
-    setError(null)
+    console.log("Saving")
+    if (!session?.accessToken) {
+      toast({ title: "Error", description: "Authentication details missing.", variant: "destructive" });
+
+      return;
+    }
+    console.log("Well");
+    setIsSaving(true);
+    setError(null);
     try {
-      const response = await fetch(`/access/update_config`, {
+      console.log(`${API_BASE_URL}/access/config/update_config`)
+      const response = await fetch(`${API_BASE_URL}/access/config/update_config`, { // Ensure API_BASE_URL is used
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.accessToken}`,
-          "X-CSRF-TOKEN": session?.csrftoken
+          "Authorization": `Bearer ${session.accessToken}`,
+          "X-CSRF-TOKEN": session.csrftoken 
         },
         body: JSON.stringify(config),
-      })
+      });
       if (response.status === 401) {
         signOut();
+        return;
       }
       if (!response.ok) {
-        throw new Error(`Failed to save configuration: ${response.status}`)
+        const errorData = await response.json().catch(() => ({})); // Try to get error message from body
+        throw new Error(`Failed to save configuration: ${response.status} ${response.statusText}. ${errorData.detail || ''}`);
       }
 
-      setHasChanges(false)
+      setHasChanges(false);
       toast({
-        title: "Configuration saved",
+        title: "Configuration Saved",
         description: "Your configuration changes have been saved successfully.",
-      })
-      fetchConfig()
-    } catch (err) {
-      console.error("Error saving configuration:", err)
-      setError("Failed to save configuration. Please try again.")
+      });
+      fetchConfig(); // Refetch to confirm changes and get any backend-processed values
+    } catch (err: any) {
+      console.error("Error saving configuration:", err);
+      setError(err.message || "Failed to save configuration. Please try again.");
       toast({
-        title: "Error",
-        description: "Failed to save configuration. Please try again.",
+        title: "Error Saving Config",
+        description: err.message || "Failed to save configuration. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSaving(false)
-      fetchConfig()
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleReset = async () => {
-   
-      setIsSaving(true)
-      setError(null)
+    if (!session?.accessToken) {
+      toast({ title: "Error", description: "Authentication details missing.", variant: "destructive" });
+      return;
+    }
+    setIsSaving(true); // Use isSaving to disable buttons during reset
+    setError(null);
       
-      try {
-        const response = await fetch(`/access/update_config`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session?.accessToken}`,
-            "X-CSRF-TOKEN": session?.csrftoken
+    try {
+      const response = await fetch(`${API_BASE_URL}/access/config/update_config`, { 
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.accessToken}`,
+          "X-CSRF-TOKEN": session.csrftoken 
+        },
+        body: JSON.stringify({
+          system: { 
+            config_reset: true, // Or "True" if backend expects string
           },
-          body: JSON.stringify({
-            system: {
-              config_reset: "True",
-            },
-          }),
-        })
-        if (response.status === 401) {
-          signOut();
-        }
-        if (!response.ok) {
-          throw new Error(`Failed to save configuration: ${response.status}`)
-        }
-  
-        setHasChanges(false)
-        toast({
-          title: "Configuration reset",
-          description: "Your configuration has been reset to default values.",
-        })
-      } catch (err) {
-        console.error("Error saving configuration:", err)
-        setError("Failed to save configuration. Please try again.")
-        toast({
-          title: "Error",
-          description: "Failed to save configuration. Please try again.",
-          variant: "destructive",
-        })
-      } finally {
-        setIsSaving(false)
-        fetchConfig()
-        setHasChanges(false)
+        }),
+      });
+      if (response.status === 401) {
+        signOut();
+        return;
       }
-  }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Failed to reset configuration: ${response.status} ${response.statusText}. ${errorData.detail || ''}`);
+      }
+  
+      setHasChanges(false); // Changes are gone after reset
+      toast({
+        title: "Configuration Reset",
+        description: "Configuration has been requested to reset to defaults.",
+      });
+      fetchConfig(); // Fetch the new default configuration
+    } catch (err: any) {
+      console.error("Error resetting configuration:", err);
+      setError(err.message || "Failed to reset configuration. Please try again.");
+      toast({
+        title: "Error Resetting Config",
+        description: err.message || "Failed to reset configuration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleChangePassword = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!session?.user?.name || !session?.accessToken) {
+      setPasswordChangeError('User details or token not available.');
+      return;
+    }
+    setIsChangingPassword(true);
+    setPasswordChangeError(null);
+
     const payload = {
-      "new_password": newPassword,
-      "old_password": password,
-      "user": session?.user?.name,
+      new_password: newPassword,
+      old_password: oldPassword, // Ensure this state variable is named oldPassword
+      user: session.user.name,
     };
 
     try {
-      const response = await fetch(`/access/change_password`, {
+      const response = await fetch(`${API_BASE_URL}/access/auth/change_password`, { // Check endpoint, was /access/change_password
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.accessToken}`,
-          "X-CSRF-TOKEN": session?.csrftoken
+          "Authorization": `Bearer ${session.accessToken}`,
+          "X-CSRF-TOKEN": session.csrftoken
         },
         body: JSON.stringify(payload),
       });
 
+      const responseData = await response.json().catch(() => null);
+
       if (response.status === 401) {
-        setLoginError('Invalid Credentials!')
-        
+        setPasswordChangeError(responseData?.detail || 'Invalid current password.');
+      } else if (response.status === 400) {
+        setPasswordChangeError(responseData?.detail || 'Password change request invalid (e.g., too short).');
       } else if (!response.ok) {
-        setLoginError('Error when changing password')
-        
+        setPasswordChangeError(responseData?.detail || 'Error changing password. Please try again.');
       } else {
-        alert("Password changed successfully!");
+        toast({ title: "Success", description: "Password changed successfully!" });
+        setOldPassword('');
+        setNewPassword('');
       }
     } catch (error) {
       console.error("Error changing password:", error);
-      setLoginError('Error when changing password')
-      
+      setPasswordChangeError('An unexpected error occurred while changing password.');
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+  if (isLoading) {
+    return <div className="text-center py-10">Loading configuration...</div>;
+  }
+
+  if (error && !config) { // Show error prominently if config failed to load entirely
+    return (
+      <div className="space-y-6">
         <h1 className="text-3xl font-bold">Server Configuration</h1>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={handleReset}>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Loading Configuration</AlertTitle>
+          <AlertDescription>
+            {error} <Button variant="link" onClick={fetchConfig}>Try again</Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+  
+  if (!config) { // Should be caught by isLoading or error, but as a fallback
+    return <div className="text-center py-10">Configuration data is not available.</div>;
+  }
+
+
+  return (
+    <div className="space-y-6 p-4 md:p-6">
+      {error && ( // Display non-critical errors as a toast or inline message
+         <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>An error occurred</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <h1 className="text-2xl lg:text-3xl font-bold">Server Configuration</h1>
+        <div className="flex space-x-2 flex-wrap">
+          <Button variant="outline" onClick={handleReset} disabled={isSaving}>
             <RotateCcw className="mr-2 h-4 w-4" />
             Reset to Defaults
           </Button>
-          <Button onClick={handleSave} disabled={!hasChanges}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
+          <Button onClick={handleSave} disabled={!hasChanges || isSaving} >
+            {isSaving && !hasChanges ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isSaving && !hasChanges ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>
-      {config === undefined ? (
-          <div className="text-center py-8 text-muted-foreground">
-          Failed to load config
-          </div>
-        ) : config && (
-          <Tabs defaultValue="measurements">
-            <TabsList>
-              <TabsTrigger value="measurements">Measurement Units</TabsTrigger>
-              <TabsTrigger value="system">System Settings</TabsTrigger>
-            </TabsList>
+      
+        <Tabs defaultValue="measurements" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:w-auto md:inline-flex">
+            <TabsTrigger value="measurements">Measurement Units</TabsTrigger>
+            <TabsTrigger value="system">System Settings</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="measurements">
+          <TabsContent value="measurements">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+              {Object.entries(config.measurements).map(([key, measurement]) => {
+                const displayName = formatKeyToLabel(key);
+                const unitsForThisType = measurementUnitOptions[key] || [];
+                // Ensure current unit from DB is in options if not already there
+                const currentUnitExistsInOptions = unitsForThisType.some(opt => opt.value === measurement.unit);
+                if (measurement.unit && !currentUnitExistsInOptions) {
+                    unitsForThisType.push({value: measurement.unit, label: `${measurement.unit} (current)`});
+                }
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-                {Object.entries(config.measurements).map(([key, measurement]) => (
-                  <Card key={key} className="bg-card/50 backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="capitalize">{key}</CardTitle>
-                      <CardDescription>Configure {key} measurement settings</CardDescription>
-                    </CardHeader>
-          
-                    <CardContent className="space-y-4">
-                    { !["humidity"].includes(key)&& (
-                      <div className="space-y-2">
-                        <Label htmlFor={`${key}-unit`}>Unit</Label>
-                        <Select
-                          defaultValue={measurement.unit}
-                          onValueChange={(value) => handleMeasurementChange(key, "unit", value)}
-                        >
-                          <SelectTrigger id={`${key}-unit`}>
-                            <SelectValue placeholder="Select unit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {key === "temperature" && (
-                              <>
-                                <SelectItem value="degC">Celsius (°C)</SelectItem>
-                                <SelectItem value="degF">Fahrenheit (°F)</SelectItem>
-                              </>
-                            )}
-                            {key === "weight" && (
-                              <>
-                                <SelectItem value="gram">Grams (g)</SelectItem>
-                                <SelectItem value="kg">Kilograms (kg)</SelectItem>
-                                <SelectItem value="lb">Pounds (lb)</SelectItem>
-                              </>
-                            )}
-                            {key === "sound" && <SelectItem value="dB">Decibels (dB)</SelectItem>}
-                            {key === "light" && (
-                              <>
-                                <SelectItem value="lux">Lux (lux)</SelectItem>
-                                <SelectItem value="fc">Foot-candles (fc)</SelectItem>
-                              </>
-                            )}
-                            {key === "speed" && (
-                              <>
-                                <SelectItem value="m/s">Meters per second (m/s)</SelectItem>
-                                <SelectItem value="km/h">Kilometer per hour (km/h)</SelectItem>
-                                <SelectItem value="mph">Miles per hour (mph)</SelectItem>
-                              </>
-                            )}
-                            {key === "pressure" && (
-                              <>
-                                <SelectItem value="Pa">Pascal (Pa)</SelectItem>
-                                <SelectItem value="hPa">Hectopascal (hPa)</SelectItem>
-                                <SelectItem value="kPa">Kilopascal (kPa)</SelectItem>
-                                <SelectItem value="mbar">Millibar (mbar)</SelectItem>
-                                <SelectItem value="bar">Bar (bar)</SelectItem>
-                                <SelectItem value="atm">Atmosphere (atm)</SelectItem>
-                                <SelectItem value="psi">Pound per square inch (psi)</SelectItem>
-                              </>
-                            )}
-                            {key === "voltage" && (
-                              <>
-                                <SelectItem value="mV">Milivolts (mV)</SelectItem>
-                                <SelectItem value="V">Volt (V)</SelectItem>
-                              </>
-                            )}
-                            {key === "wattage" && (
-                              <>
-                                <SelectItem value="mW">Miliwatt (mW)</SelectItem>
-                                <SelectItem value="W">Watt (W)</SelectItem>
-                              </>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                        )}
-                    
-                      <div className="space-y-2">
-                        <Label htmlFor={`${key}-decimal`}>Decimal Places</Label>
-                        <Select
-                          defaultValue={measurement.decimalPlaces.toString()}
-                          onValueChange={(value) => handleMeasurementChange(key, "decimalPlaces", Number.parseInt(value))}
-                        >
-                          <SelectTrigger id={`${key}-decimal`}>
-                            <SelectValue placeholder="Select decimal places" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0">0</SelectItem>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
-                            <SelectItem value="3">3</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor={`${key}-min`}>Lowest</Label>
-                          <Input
-                            id={`${key}-min`}
-                            type="number"
-                            value={String(measurement.lowest)}
-                            onChange={(e) => handleMeasurementChange(key, "lowest", Number.parseFloat(e.target.value))}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor={`${key}-max`}>Highest</Label>
-                          <Input
-                            id={`${key}-max`}
-                            type="number"
-                            value={String(measurement.highest)}
-                            onChange={(e) => handleMeasurementChange(key, "highest", Number.parseFloat(e.target.value))}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="system">
-              <Card className="bg-card/50 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>System Settings</CardTitle>
-                  <CardDescription>Configure general system settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Backup Settings</h3>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="auto-backup">Automatic Backup</Label>
-                        <p className="text-xs text-muted-foreground">Automatically backup system data</p>
-                      </div>
-                      <Switch
-                        id="auto-backup"
-                        checked={config.system.autoBackup}
-                        onCheckedChange={(checked) => handleSystemChange("autoBackup", checked)}
-                      />
+                return (
+                <Card key={key} className="bg-card/50 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle>{displayName}</CardTitle>
+                    <CardDescription>Configure {displayName.toLowerCase()} settings</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                  { !["humidity"].includes(key) && measurement.hasOwnProperty('unit') && ( // Only show unit if key is not humidity AND unit property exists
+                    <div className="space-y-2">
+                      <Label htmlFor={`${key}-unit`}>Unit</Label>
+                      <Select
+                        value={measurement.unit || ""} // Controlled component
+                        onValueChange={(value) => handleMeasurementChange(key, "unit", value)}
+                      >
+                        <SelectTrigger id={`${key}-unit`}>
+                          <SelectValue placeholder="Select unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {unitsForThisType.length > 0 ? (
+                            unitsForThisType.map(unitOpt => (
+                              <SelectItem key={unitOpt.value} value={unitOpt.value}>{unitOpt.label}</SelectItem>
+                            ))
+                          ) : measurement.unit ? ( // Fallback if no predefined but DB has one
+                             <SelectItem value={measurement.unit}>{measurement.unit}</SelectItem>
+                          ) : (
+                            <SelectItem value="" disabled>No units defined</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
-
-                    {config.system.autoBackup && (
+                  )}
+                  {measurement.hasOwnProperty('decimalPlaces') && (
+                    <div className="space-y-2">
+                      <Label htmlFor={`${key}-decimal`}>Decimal Places</Label>
+                      <Select
+                        value={(measurement.decimalPlaces ?? "").toString()} // Controlled
+                        onValueChange={(value) => handleMeasurementChange(key, "decimalPlaces", Number.parseInt(value))}
+                      >
+                        <SelectTrigger id={`${key}-decimal`}>
+                          <SelectValue placeholder="Select decimal places" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[0, 1, 2, 3, 4].map(dp => ( // Extended options
+                             <SelectItem key={dp} value={dp.toString()}>{dp}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    {measurement.hasOwnProperty('lowest') && (
                       <div className="space-y-2">
-                        <Label htmlFor="backup-frequency">Backup Frequency</Label>
-                        <Select
-                          defaultValue={config.system.backupFrequency}
-                          onValueChange={(value) => handleSystemChange("backupFrequency", value)}
-                        >
-                          <SelectTrigger id="backup-frequency">
-                            <SelectValue placeholder="Select frequency" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="hourly">Hourly</SelectItem>
-                            <SelectItem value="daily">Daily</SelectItem>
-                            <SelectItem value="weekly">Weekly</SelectItem>
-                            <SelectItem value="monthly">Monthly</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor={`${key}-lowest`}>Lowest Acceptable</Label>
+                        <Input
+                          id={`${key}-lowest`}
+                          type="number"
+                          value={measurement.lowest === null || measurement.lowest === undefined ? "" : String(measurement.lowest)}
+                          onChange={(e) => handleMeasurementChange(key, "lowest", e.target.value === "" ? null : Number.parseFloat(e.target.value))}
+                        />
+                      </div>
+                    )}
+                    {measurement.hasOwnProperty('highest') && (
+                      <div className="space-y-2">
+                        <Label htmlFor={`${key}-highest`}>Highest Acceptable</Label>
+                        <Input
+                          id={`${key}-highest`}
+                          type="number"
+                          value={measurement.highest === null || measurement.highest === undefined ? "" : String(measurement.highest)}
+                          onChange={(e) => handleMeasurementChange(key, "highest", e.target.value === "" ? null : Number.parseFloat(e.target.value))}
+                        />
                       </div>
                     )}
                   </div>
-                  {loginError && (
-                    <Alert variant="destructive">
+                  </CardContent>
+                </Card>
+              )})}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="system">
+            <Card className="bg-card/50 backdrop-blur-sm mt-4">
+              <CardHeader>
+                <CardTitle>System Settings</CardTitle>
+                <CardDescription>Configure general system settings</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {Object.entries(config.system).map(([key, value]) => {
+                  const displayName = formatKeyToLabel(key);
+                  const selectOptions = systemSettingSelectOptions[key];
+
+                  if (typeof value === 'boolean') {
+                    return (
+                      <div key={key} className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor={`system-${key}`}>{displayName}</Label>
+                          {/* Optional: Add description based on key */}
+                          {/* <p className="text-xs text-muted-foreground">Description for {displayName}</p> */}
+                        </div>
+                        <Switch
+                          id={`system-${key}`}
+                          checked={value}
+                          onCheckedChange={(checked) => handleSystemChange(key, checked)}
+                        />
+                      </div>
+                    );
+                  } else if (selectOptions) {
+                    return (
+                      <div key={key} className="space-y-2">
+                        <Label htmlFor={`system-${key}`}>{displayName}</Label>
+                        <Select
+                          value={String(value)}
+                          onValueChange={(selectVal) => handleSystemChange(key, selectVal)}
+                        >
+                          <SelectTrigger id={`system-${key}`}>
+                            <SelectValue placeholder={`Select ${displayName.toLowerCase()}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectOptions.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    );
+                  } else { // Default to text/number input
+                    return (
+                      <div key={key} className="space-y-2">
+                        <Label htmlFor={`system-${key}`}>{displayName}</Label>
+                        <Input
+                          id={`system-${key}`}
+                          type={typeof value === 'number' ? 'number' : 'text'}
+                          value={String(value ?? '')}
+                          onChange={(e) => handleSystemChange(key, 
+                            typeof value === 'number' 
+                              ? (e.target.value === "" ? null : Number.parseFloat(e.target.value)) 
+                              : e.target.value
+                          )}
+                        />
+                      </div>
+                    );
+                  }
+                })}
+                
+                {/* Password Change Section - separated for clarity */}
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-medium mb-4">Change Password</h3>
+                  {passwordChangeError && (
+                    <Alert variant="destructive" className="mb-4">
                       <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>{loginError}</AlertDescription>
+                      <AlertTitle>Password Change Error</AlertTitle>
+                      <AlertDescription>{passwordChangeError}</AlertDescription>
                     </Alert>
                   )}
-                  <form onSubmit={handleChangePassword}>
-                    <div className="space-y-4">
-          
-                      <div className="space-y-2">
-                        <Label htmlFor="oldPassword">Old Password</Label>
-                        <Input
-                          id="oldPassword"
-                          type="oldPassword"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="newPassword">New Password</Label>
-                        <Input
-                          id="newPassword"
-                          type="newPassword"
-                          placeholder="••••••••"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                      </div>
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="oldPassword">Current Password</Label>
+                      <Input
+                        id="oldPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        required
+                      />
                     </div>
-                    <Button effect="ringHover" type="submit" className="w-half mt-6" disabled={isLoading}>
-                      {isLoading ? "Setting new password in..." : "Set new password"}
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full md:w-auto" disabled={isChangingPassword}>
+                      {isChangingPassword ? "Changing..." : "Set New Password"}
                     </Button>
                   </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          
-          </Tabs>
-      )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
     </div>
-  )
+  );
 }
-

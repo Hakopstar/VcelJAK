@@ -1,56 +1,80 @@
+####################################################
+# SSE management
+# Last version of update: v0.95
+# app/sse.py
+####################################################
+
+import os
 import json
-import queue
-from flask import Blueprint, Response, stream_with_context, request
-from app.db_man.multidb_func import get_all_measurement, get_last_sensor_data
-import logging
-import time
+import redis
 import gevent
-import flask
-from app.db_man.memcache.mem_engine import mc
+from flask import Blueprint, Response, stream_with_context
 
-# Create a blueprint for SSE with URL prefix '/sse'
-sse_bp = Blueprint('sse', __name__, url_prefix='/sse')
+# -----------------------------------------------------------------------------
+# 1. Initialize Redis client (import time)
+# -----------------------------------------------------------------------------
+r = redis.Redis.from_url(f"redis://{os.getenv('REDIS_HOST')}:{os.getenv('REDIS_PORT')}/{os.getenv('REDIS_DB')}", decode_responses=True)
 
-# Global SSE data state matching the Next.js component's requirements.
-sse_data = {
-    "health_value": 0,  # example initial value
-    "humidity": 0,       # percentage
-    "temperature": 0,  # Celsius
-    "wind_speed": 0,    # m/s
+# -----------------------------------------------------------------------------
+# 2. Initial SSE state
+# -----------------------------------------------------------------------------
+INITIAL_STATE = {
+    "humidity": 0,
+    "temperature": 0,
+    "wind_speed": 0,
+    "health_value": 0,
     "tips": []
 }
+# Store initial state in Redis if not already present
+if not r.exists('sse_data'):
+    r.set('sse_data', json.dumps(INITIAL_STATE))
 
-
-# List to store each subscriber's message queue.
-
-
-mc.set('sse_data', sse_data)
+# -----------------------------------------------------------------------------
+# 3. Blueprint setup
+# -----------------------------------------------------------------------------
+sse_bp = Blueprint('sse', __name__, url_prefix='/sse')
+CHANNEL = 'sse_channel'
 
 @sse_bp.route('/stream')
 def stream():
     """
-    SSE endpoint that streams updates to connected clients.
-    This endpoint polls memcached for changes to the state.
+    SSE endpoint that streams updates to connected clients
+    by subscribing to a Redis Pub/Sub channel.
     """
     def event_stream():
-        # Get the current state from memcached.
-        last_data = mc.get('sse_data')
-        yield f"data: {json.dumps(last_data)}\n\n"
-        while True:
-            gevent.sleep(10)  # poll every second; adjust the interval as needed
-            current_data = mc.get('sse_data')
-            if current_data != last_data:
-                last_data = current_data
-                yield f"data: {json.dumps(current_data)}\n\n"
-    return Response(event_stream(), mimetype="text/event-stream")
+        # 3.1 Send current state snapshot
+        last_state = json.loads(r.get('sse_data'))
+        yield f"data: {json.dumps(last_state)}\n\n"
 
+        # 3.2 Subscribe to Redis channel for updates
+        pubsub = r.pubsub(ignore_subscribe_messages=True)
+        pubsub.subscribe(CHANNEL)
+
+        # 3.3 Listen for new messages
+        for message in pubsub.listen():
+            # message['data'] is the JSON-stringified new state
+            try:
+                data = message['data']
+                yield f"data: {data}\n\n"
+            except Exception:
+                # Skip invalid or non-data messages
+                continue
+
+    # Use stream_with_context to ensure request context stays alive
+    return Response(stream_with_context(event_stream()),
+                    mimetype="text/event-stream")
 
 def update_sse(new_data):
     """
-    Function to update the shared sse_data.
-    This can be called from any part of your system.
-    Example: update_sse({"tips": ["New tip"]})
+    Update the shared SSE state in Redis and publish
+    the full updated state to subscribers.
     """
-    global sse_data
-    sse_data.update(new_data)
-    mc.set('sse_data', sse_data)
+    # 4.1 Load current state and merge updates
+    state = json.loads(r.get('sse_data'))
+    state.update(new_data)
+
+    # 4.2 Store updated state
+    r.set('sse_data', json.dumps(state))
+
+    # 4.3 Publish to all subscribers
+    r.publish(CHANNEL, json.dumps(state))

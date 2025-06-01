@@ -1,7 +1,7 @@
 // context/SSEContext.js
 "use client"
 import { createContext, useContext, useEffect, useState } from "react";
-// TODO: REWORK THE WHOLE SYSTEM
+
 
 interface SSEData {
   healthValue: number | null;
@@ -22,13 +22,13 @@ export const SSEProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [windSpeed, setWindSpeed] = useState<number | null>(null);
   const [tips, setTips] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-
+  const AUTH_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || ''
   useEffect(() => {
     let eventSource: EventSource | null = null;
     let retryTimeout: NodeJS.Timeout | null = null;
-    console.log(process.env.NEXT_PUBLIC_WEBSITE_URL)
     const connect = () => {
-        eventSource = new EventSource('/sse/stream'); // Change to your SSE server URL
+      console.log(process.env.NEXT_PUBLIC_API_BASE_URL)
+        eventSource = new EventSource(`${AUTH_BASE}/sse/stream`); 
 
         eventSource.onmessage = (event) => {
             try {

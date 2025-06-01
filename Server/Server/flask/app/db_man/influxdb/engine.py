@@ -1,3 +1,11 @@
+####################################################
+# influxdb engine
+# Last version of update: v0.95
+# app/db_man/influxdb/engine.py
+####################################################
+
+# TODO: Engine is in multiple files, get refences to this file
+
 import os
 import influxdb_client
 from influxdb_client import InfluxDBClient, Point, WritePrecision

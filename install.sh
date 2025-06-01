@@ -119,6 +119,10 @@ else
     echo "  - FLASK_DEBUG: 10"
     echo "  - NUMBER_PRECISION: 2"
     echo "  - HARDWARE_SESSION_EXPIRE: 86000"
+    echo "  - LAST_READING_DB_BATCH_SIZE: 100"
+    echo "  - LAST_READING_QUERY_RANGE_MINUTES: 30"
+    echo "  - SCHEDULER_INTERVAL_MINUTES: 1"
+    echo "  - DB timeouts: 10"
     # ... (other defaults listed before)
     echo "You can change these in '$ENV_FILE_PATH' after this script finishes."
     echo "--------------------------------------------------------------------"
@@ -144,10 +148,12 @@ else
 SYSTEM_VERSION=0.91
 API_VERSION=3.1
 
-# MEMCACHE (Defaults, editable)
+# Redis (Defaults, editable)
 #########################################################################
-MEMCACHE_PORT='11211'
-MEMCACHE_HOST='memcached'
+REDIS_PORT='6379'
+REDIS_HOST='redis'
+REDIS_DB = 0
+REDIS_TIMEOUT = 10
 
 # FLASK
 #########################################################################
@@ -171,6 +177,11 @@ NUMBER_PRECISION=2
 # Hardware session expiration time in seconds
 HARDWARE_SESSION_EXPIRE=86000
 
+# Influxdb flask prompts
+LAST_READING_DB_BATCH_SIZE=100
+LAST_READING_QUERY_RANGE_MINUTES=30
+SCHEDULER_INTERVAL_MINUTES=1
+
 ##########################################################################
 # DATABASE SECTION :
 ###############################
@@ -189,6 +200,7 @@ DOCKER_INFLUXDB_INIT_ORG=beehivegjak
 DOCKER_INFLUXDB_INIT_BUCKET=main
 # DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: Admin token for InfluxDB (Auto-generated)
 DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+INFLUXDB_TIMEOUT=10
 ###################
 
 ###################
@@ -205,6 +217,9 @@ POSTGRES_AUDIO_ACCESS_PASS=${POSTGRES_AUDIO_ACCESS_PASS}
 POSTGRES_USERS_ACCESS_PASS=${POSTGRES_USERS_ACCESS_PASS}
 # POSTGRES_TEST_PASS: Password for test user (User-defined)
 POSTGRES_TEST_PASS=${POSTGRES_TEST_PASS}
+
+POSTGRES_TIMEOUT=10
+DATABASE_URL = http://postgres:5432
 ###################
 
 ##########################################################################

@@ -29,6 +29,10 @@ type Hub = {
   lastUpdate: string
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+
+
 export default function SensorsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -52,7 +56,7 @@ export default function SensorsPage() {
     setError(null)
     try {
       // Fetch sensors
-      const sensorsResponse = await fetch(`/access/get_info_sensors`, {
+      const sensorsResponse = await fetch(`${API_BASE_URL}/access/sensors_hubs/get_info_sensors`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${session?.accessToken}`
@@ -69,7 +73,7 @@ export default function SensorsPage() {
       setSensors(sensorsData)
 
       // Fetch hubs
-      const hubsResponse = await fetch(`/access/get_hub_info`,{
+      const hubsResponse = await fetch(`${API_BASE_URL}/access/sensors_hubs/get_hub_info`,{
         method: "GET",
         headers: {
           "Authorization": `Bearer ${session?.accessToken}`

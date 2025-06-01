@@ -1,0 +1,21 @@
+[
+   {
+        "id": "4-brood",
+        "name": "Brood Chamber",
+        "type": "purpose",
+        "description": "Area for queen and larvae"
+    },
+
+    {
+        "id": "5-food",
+        "name": "Food Storage",
+        "type": "purpose",
+        "description": "Honey and pollen storage area"
+    },
+    {
+        "id": "6-full",
+        "name": "Full Beehive",
+        "type": "purpose",
+        "description": "Complete beehive structure"
+  }
+]

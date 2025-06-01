@@ -7,10 +7,15 @@ import Credentials from "next-auth/providers/credentials";
 import NextAuth from 'next-auth'
 import jwtDecode from "jwt-decode";
 
+const NEXT_AUTH = process.env.NEXT_PUBLIC_API_BASE_URL || ''
+
 export function useLogout() {
   const router = useRouter();
   const { data: session } = useSession();
   const logout = async () => {
+    console.log("Session_useLogout")
+    console.log(session?.accessToken)
+    console.log(session?.csrfToken)
     if (!session) {
       console.error("Missing Session Data");
       await signOut({ redirect: false });
@@ -18,7 +23,7 @@ export function useLogout() {
       return;
     }
     try {
-      const res = await fetch('/access/logout', {
+      const res = await fetch(`${NEXT_AUTH}/access/logout`, {
         method: "POST",
         credentials: "include", // Send cookies
         headers: {
