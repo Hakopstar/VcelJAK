@@ -57,11 +57,5 @@ Tyto endpointy slouží primárně pro komunikaci mezi backendem a hardwarovým 
 ### Administrační API (`/access/*`)
 Tyto endpointy slouží ke správě a administraci serveru a vyžadují platný JWT token v `Authorization: Bearer <token>` hlavičce (kromě `/access/login`). Interakce s těmito endpointy automaticky prodlužuje expiraci JWT tokenu.
 
-*   **`POST /access/login`**: Přihlášení uživatele.
-    *   **Tělo požadavku (JSON):** `username`, `password`.
-    *   **Odpověď (JSON):** JWT token.
-*   **`POST /access/logout`**: Odhlášení uživatele (invalidace JWT tokenu).
-*   **`GET /access/token_verify`**: Ověření platnosti aktuálně používaného JWT tokenu.
-    *   **Odpověď:** 200 OK pokud je platný, 400 "invalid credentials" pokud neplatný.
 
 ---
