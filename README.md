@@ -21,7 +21,7 @@ Hardwarová část je zodpovědná za sběr dat přímo z prostředí včelích 
 *   **Hardwarové Huby:** Centrální jednotky umístěné u včelstev, které shromažďují data z připojených senzorů. Tyto huby zajišťují komunikaci se serverovou částí.
 *   **Senzory:** Různé typy senzorů (např. BMX280 pro teplotu, vlhkost a tlak; HX711 pro měření hmotnosti úlu) připojené k hardwarovým hubům. Tyto senzory měří klíčové veličiny vypovídající o stavu včelstva a okolního prostředí.
 
-*(Poznámka: Hardwarové část je ve vývoje v nejbližší době bude zveřejněna)*
+*(Poznámka: Hardwarové část je ve vývoji, v nejbližší době bude zveřejněna)*
 
 ### 2. Serverová Část (Tento Repozitář)
 
@@ -34,7 +34,7 @@ Serverová část tvoří mozek celého systému. Zajišťuje:
 *   **API Rozhraní:** Poskytuje API pro komunikaci mezi hardwarovými huby a frontendovou aplikací.
 
 Pro detailní informace o architektuře, použitých technologiích, instalaci a konfiguraci serverové části navštivte:
-**[README Serverové Části](Server/Server/README.md)**
+**[README Serverové Části](Server/README.md)**
 
 
 ## Cíle Projektu
