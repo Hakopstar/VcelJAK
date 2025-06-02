@@ -34,7 +34,7 @@ Serverová část tvoří mozek celého systému. Zajišťuje:
 *   **API Rozhraní:** Poskytuje API pro komunikaci mezi hardwarovými huby a frontendovou aplikací.
 
 Pro detailní informace o architektuře, použitých technologiích, instalaci a konfiguraci serverové části navštivte:
-**[README Serverové Části](Server/README.md)**
+**[README Serverové Části](Server/readme.md)**
 
 
 ## Cíle Projektu
