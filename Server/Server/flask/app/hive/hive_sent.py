@@ -24,7 +24,7 @@ def run_processing_pipeline(db: Session, rc: Optional[redis.Redis], session_id: 
         logging.info(f"Client id: {client_id}")
     except Exception as err:
         logging.error(f"Getting client id from session id failed: {err}")
-        return 500, err
+        return 500, "Server-Error"
 
    # Get redis client (might be None)
 
@@ -56,6 +56,6 @@ def run_processing_pipeline(db: Session, rc: Optional[redis.Redis], session_id: 
     except Exception as e:
         # Catch unexpected errors during the pipeline execution
         logging.error(f"An error occurred in the processing pipeline for {client_id}: {e}", exc_info=True)
-        return 500, e
+        return 500, "system_error"
     logging.info(f"Processing pipeline finished for client_id: {client_id}")
     return 201, "SUCCESS"

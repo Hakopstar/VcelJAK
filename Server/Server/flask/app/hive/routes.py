@@ -122,8 +122,8 @@ def handle_sensor_request():
     db = DbRequestSession() 
     code_data, value = run_processing_pipeline(db, rc, client_id, json_data['data'])
     if code_data != 201:
-        logging.debug(f"InfluxDB sending communication failed {code_data}")
-        return f"{value}", code_data
+        logging.warning(f"InfluxDB sending communication failed {code_data}")
+        return f"{value}", "Server problem"
     update_tips()
     return "Updated", 201
 
