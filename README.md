@@ -1,4 +1,4 @@
-# VčelJAK - Včelařský Elektronický Monitorovací Systém Gymnázia Jana Amose Komenského
+# VčelJAK
 
 <p align="center">
   <img src="icon.png" alt="Project Logo" width="200" />
@@ -6,7 +6,7 @@
 
 
 
-VčelJAK (VČelařský ELektronický monitorovací systém Gymnázia Jana Amose Komenského) je studentský projekt zaměřený na monitorování včelích úlů. Projekt integruje jak specializovanou hardwarovou část pro sběr dat přímo z úlů, tak softwarové řešení pro zpracování, ukládání, analýzu a vizualizaci těchto dat.
+VčelJAK (Včely? a JAK jsou na tom včely?) je projekt zaměřený na monitorování včelích úlů. Projekt integruje jak specializovanou hardwarovou část pro sběr dat přímo z úlů, tak softwarové řešení pro zpracování, ukládání, analýzu a vizualizaci těchto dat.
 
 Cílem projektu je poskytnout včelařům moderní nástroj pro detailní sledování stavu a podmínek ve včelstvech, což umožňuje lepší péči a optimalizaci včelařských postupů.
 
