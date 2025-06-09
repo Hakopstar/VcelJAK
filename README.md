@@ -42,7 +42,3 @@ Pro detailní informace o architektuře, použitých technologiích, instalaci a
 *   Poskytnout studentům platformu pro praktické uplatnění znalostí v oblasti elektroniky, programování a datové analýzy.
 *   Vytvořit funkční a užitečný nástroj pro včelaře.
 *   Zvýšit povědomí o důležitosti včel a moderních technologií v zemědělství.
-
-
-
-Tento projekt vznikl jako studentská práce na Gymnáziu Jana Amose Komenského.
