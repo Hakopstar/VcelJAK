@@ -14,16 +14,18 @@ Cílem projektu je poskytnout včelařům moderní nástroj pro detailní sledov
 
 Projekt VčelJAK se skládá ze dvou hlavních částí:
 
-### 1. Hardwarová Část
+### 1. Hardwarová Část (BeeFasyer series)
 
-Hardwarová část je zodpovědná za sběr dat přímo z prostředí včelích úlů. Zahrnuje:
+BeeFasyer - je serie desek, navrhnutými pro tento projekt. Jsou zodpovědné za sběr dat přímo z prostředí včelích úlů. Zahrnují:
 
-*   **Hardwarové Huby:** Centrální jednotky umístěné u včelstev, které shromažďují data z připojených senzorů. Tyto huby zajišťují komunikaci se serverovou částí.
-*   **Senzory:** Různé typy senzorů (např. BMX280 pro teplotu, vlhkost a tlak; HX711 pro měření hmotnosti úlu) připojené k hardwarovým hubům. Tyto senzory měří klíčové veličiny vypovídající o stavu včelstva a okolního prostředí.
+*   **Hardwarové huby (označení Sparrow):** Centrální jednotky umístěné u včelstev, které shromažďují data z připojených senzorů. Tyto huby zajišťují komunikaci se serverovou částí.
+    
+*   **Senzory (označení: Bluebird, Swallow, Crow):** Různé typy senzorů (např. BMX280 pro teplotu, vlhkost a tlak; HX711 pro měření hmotnosti úlu) připojené k hardwarovým hubům. Tyto senzory měří klíčové veličiny vypovídající o stavu včelstva a okolního prostředí.
 
-*(Poznámka: Hardwarové část je ve vývoji, v nejbližší době bude zveřejněna)*
 
-### 2. Serverová Část (Tento Repozitář)
+ 
+
+### 2. Serverová Část (Tento Repozitář) (BeeHOW)
 
 Serverová část tvoří mozek celého systému. Zajišťuje:
 
